@@ -1,4 +1,11 @@
 {
+  "name": "student-marketplace",
+  "private": true,
+  "scripts": {
+    "dev": "tsx server/src/server.ts",
+    "build": "tsc -p server/tsconfig.json",
+    "start": "node server/dist/server.js"
+  },
   "dependencies": {
     "@prisma/client": "6.19.3",
     "bcrypt": "6.0.0",
@@ -10,10 +17,10 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "5.0.2",
+    "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "9.0.10",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.19.21",
     "nodemon": "3.1.14",
     "prisma": "6.19.3",
