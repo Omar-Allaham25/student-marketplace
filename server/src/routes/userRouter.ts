@@ -5,7 +5,7 @@ import {
   getMe,
   deleteUser,
   getAllUsers,
-} from "../controllers/authController";
+} from "../controllers/userController";
 import { protect, restrictTo } from "../middleware/authMiddileware";
 
 const router = Router();

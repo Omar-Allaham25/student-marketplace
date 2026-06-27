@@ -3,6 +3,7 @@ import {
   createCategory,
   getAllCategory,
   deleteCategoryById,
+  modifyCategory,
 } from "../models/categoryModel";
 
 export const getAll = async (req: Request, res: Response) => {
@@ -10,6 +11,7 @@ export const getAll = async (req: Request, res: Response) => {
     const allCategories = await getAllCategory();
     return res.status(200).json({
       message: "All categories fetched successfully",
+      numberOfCategories: allCategories.length,
       categories: allCategories,
     });
   } catch (err) {
@@ -49,3 +51,25 @@ export const deleteCategory = async (req: Request, res: Response) => {
     });
   }
 };
+export const editCategory=async(req:Request,res:Response)=>{
+  try{
+    const {id}=req.params;
+    const {name}=req.body;
+    if(!id || !name){
+      return res.status(400).json({message:"Category ID and name are required"});
+      }
+      const modifiedCategory=await modifyCategory(id as string,name as string);
+      res.status(200).json({
+        status:"success",
+        message:"Category modified successfully",
+        data:modifiedCategory,
+      })
+
+}catch(err){
+    res.status(500).json({
+      status:"error",
+      message:err.message || "Internal server error"
+    });
+  }
+
+  }
