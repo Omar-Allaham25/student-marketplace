@@ -1,6 +1,7 @@
 import express,{Request,Response} from "express";
 import cors from "cors";
 import userRouter from "./routes/userRouter";
+import categoryRouter from "./routes/categoryRouter";
 
 const app = express();
 const port =process.env.PORT||5000;
@@ -10,7 +11,8 @@ app.use(cors({
     credentials: true
 }))
 app.use(express.json());
-app.use("/api/auth",userRouter);
+app.use("/api/user",userRouter);
+app.use("/api/category",categoryRouter);
 
 
 

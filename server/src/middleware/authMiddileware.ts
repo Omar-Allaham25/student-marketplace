@@ -33,3 +33,13 @@ export const protect=(req:Request,res:Response,next:NextFunction)=>{
                 message:"Invalid token"
             })
         }}
+        export const restrictTo=(req:Request,res:Response,next:NextFunction)=>{
+            const userRole=req.user?.role;
+            if(userRole!=="admin"){
+                return res.status(403).json({
+                    status:"fail",
+                    message:"Forbidden: Insufficient privileges"
+                })
+            }
+            next();
+        }
