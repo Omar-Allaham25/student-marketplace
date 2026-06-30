@@ -1,7 +1,8 @@
 import prisma from "../lib/prisma";
 import { Condition } from "@prisma/client";
+import { findUserById } from "./UserModel";
 
-export const getAll= async (filters?: Record<string, any>) => {
+export const getAll = async (filters?: Record<string, any>) => {
   try {
     const allListings = await prisma.listing.findMany({
       where: filters,
@@ -50,7 +51,20 @@ export const createListing = async (
     return newListing;
   } catch (err) {
     throw new Error(
-      err.message || "there is some thingwrong in adding new listing",
+      err.message || "there is some thingwrong in adding new products",
+    );
+  }
+};
+export const modifyListing = async (id: string, userId: string, data: any) => {
+  try {
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    const userWantToUpdate=await findUserById(userId);
+    if (!listing) throw new Error("there is no listing");
+    if (userId !== listing.userId||userWantToUpdate?.role==="student") throw new Error("UNAUTHORIZED");
+    return await prisma.listing.update({ where: { id }, data });
+  } catch (err) {
+    throw new Error(
+      err.message || "there is something wrong in editing products",
     );
   }
 };

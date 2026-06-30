@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getAll, getOne, createListing } from "../models/listingModel";
+import { getAll, getOne, createListing, modifyListing } from "../models/listingModel";
 
 export const getAllListings = async (req: Request, res: Response) => {
   try {
@@ -76,3 +76,34 @@ export const createNewListing = async (req: Request, res: Response) => {
     });
   }
 };
+export const updateListing=async (req:Request,res:Response)=>{
+  try{
+    let {listingId,title,description,price,condition,status,categoryId}=req.body;
+    if(price)price=Number(price);
+    const userId=req.user?.id;
+    if(!listingId){
+      res.status(400).json({
+        status:"fail",
+        message:"id of listing you want update is missing"
+      })
+    }
+    if(!title && !description && !price && !condition && !status && !categoryId){
+      res.status(400).json({
+        status:"fail",
+        message:"you did't update any thing should provide a field at least for update"
+      })
+    }
+    const data={title,description,price,condition,status,categoryId}
+    const updatedListing=await modifyListing(listingId,userId,data);
+    res.status(200).json({
+      status:"success",
+      message:"product updated succesfully",
+      data:updatedListing
+    })
+  }catch(err){
+    res.status(500).json({
+      status:"Error",
+      message:err.message||"there is problem from server"
+    })
+  }
+}
