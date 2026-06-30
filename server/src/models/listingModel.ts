@@ -1,0 +1,56 @@
+import prisma from "../lib/prisma";
+import { Condition } from "@prisma/client";
+
+export const getAll= async (filters?: Record<string, any>) => {
+  try {
+    const allListings = await prisma.listing.findMany({
+      where: filters,
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return allListings;
+  } catch (err) {
+    throw new Error("Error fetching listings: " + err.message);
+  }
+};
+export const getOne = async (id: string) => {
+  try {
+    const listing = await prisma.listing.findMany({ where: { id } });
+    return listing;
+  } catch (err) {
+    throw new Error("there is problem in fetch listing now !");
+  }
+};
+export const createListing = async (
+  userId: string,
+  categoryId: string,
+  title: string,
+  description: string,
+  price: number,
+  condition: Condition,
+) => {
+  try {
+    const newListing = await prisma.listing.create({
+      data: {
+        userId,
+        categoryId,
+        title,
+        description,
+        price,
+        condition,
+      },
+    });
+    return newListing;
+  } catch (err) {
+    throw new Error(
+      err.message || "there is some thingwrong in adding new listing",
+    );
+  }
+};
