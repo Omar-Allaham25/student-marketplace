@@ -58,13 +58,28 @@ export const createListing = async (
 export const modifyListing = async (id: string, userId: string, data: any) => {
   try {
     const listing = await prisma.listing.findUnique({ where: { id } });
-    const userWantToUpdate=await findUserById(userId);
+    const userWantToUpdate = await findUserById(userId);
     if (!listing) throw new Error("there is no listing");
-    if (userId !== listing.userId||userWantToUpdate?.role==="student") throw new Error("UNAUTHORIZED");
+    if (userId !== listing.userId || userWantToUpdate?.role === "student")
+      throw new Error("UNAUTHORIZED");
     return await prisma.listing.update({ where: { id }, data });
   } catch (err) {
     throw new Error(
       err.message || "there is something wrong in editing products",
+    );
+  }
+};
+export const removeListing = async (id: string, userId: string) => {
+  try {
+    const userWantToDelete = await findUserById(userId);
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) throw new Error("there is no listing");
+    if (listing.userId !== userId || userWantToDelete?.role === "student")
+      throw new Error("UNAUTHORIZED");
+    return await prisma.listing.delete({ where: { id } });
+  } catch (err) {
+    throw new Error(
+      err.message || "there is something wrong in deleting products",
     );
   }
 };
