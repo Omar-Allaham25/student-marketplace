@@ -4,10 +4,30 @@ import { findUserById } from "./UserModel";
 
 export const getAll = async (filters?: Record<string, any>) => {
   try {
+    const whereClause: Record<string, any> = {};
+    if (filters) {
+      if (filters.search) {
+        whereClause.OR = [
+          { title: { contains: filters.search, mode: "insensitive" } },
+          { description: { contains: filters.search, mode: "insensitive" } },
+        ];
+      }
+      if (filters.minPrice || filters.maxPrice) {
+        if (filters.minPrice) {
+          whereClause.price = { gte: filters.minPrice };
+        }
+        if (filters.maxPrice) {
+          whereClause.price = { lte: filters.maxPrice };
+        }
+      }
+      if (filters.condition) whereClause.condition = filters.condition;
+      if (filters.categoryId) whereClause.categoryId = filters.categoryId;
+    }
     const allListings = await prisma.listing.findMany({
-      where: filters,
+      where: whereClause,
       orderBy: { createdAt: "desc" },
       include: {
+        category: true,
         user: {
           select: {
             id: true,

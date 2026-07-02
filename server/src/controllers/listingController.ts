@@ -9,7 +9,13 @@ import {
 
 export const getAllListings = async (req: Request, res: Response) => {
   try {
-    const filters = req.query;
+    const { search, minPrice, maxPrice, condition, categoryId } = req.query;
+    let filters:any={};
+    if(search) filters.search=search as string;
+    if(minPrice) filters.minPrice=Number(minPrice);
+    if(maxPrice) filters.maxPrice=Number(maxPrice);
+    if(condition) filters.condition=condition as string;
+    if(categoryId) filters.categoryId=categoryId as string;
     const allProducts = await getAll(filters as Record<string, any>);
     res.status(200).status(200).json({
       status: "succes",
