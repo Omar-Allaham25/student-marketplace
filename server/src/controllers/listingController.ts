@@ -126,8 +126,8 @@ export const updateListing = async (req: Request, res: Response) => {
           "you did't update any thing should provide a field at least for update",
       });
     }
-    const data = { title, description, price, condition, status, categoryId, images: imagesUrls };
-    const updatedListing = await modifyListing(listingId, userId, data);
+    const data = { title, description, price, condition, status, categoryId};
+    const updatedListing = await modifyListing(listingId, userId, data, imagesUrls.length > 0 ? imagesUrls : undefined);
     res.status(200).json({
       status: "success",
       message: "product updated succesfully",
