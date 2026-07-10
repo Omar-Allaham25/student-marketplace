@@ -17,7 +17,7 @@ export const getAllListings = async (req: Request, res: Response) => {
     if(condition) filters.condition=condition as string;
     if(categoryId) filters.categoryId=categoryId as string;
     const allProducts = await getAll(filters as Record<string, any>);
-    res.status(200).status(200).json({
+    res.status(200).json({
       status: "succes",
       numberOfProducts: allProducts.length,
       listings: allProducts,
@@ -33,7 +33,7 @@ export const getListing = async (req: Request, res: Response) => {
   try {
     const listingId = req.params.id as string;
     if (!listingId) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "fail",
         message: "id is required !",
       });
@@ -55,7 +55,7 @@ export const createNewListing = async (req: Request, res: Response) => {
   try {
     let { categoryId, title, description, price, condition } = req.body;
     price = Number(price);
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (
       !userId ||
       !categoryId ||
@@ -64,7 +64,7 @@ export const createNewListing = async (req: Request, res: Response) => {
       !price ||
       !condition
     ) {
-      res.status(400).json({
+     return res.status(400).json({
         status: "fail",
         message: "all fields required, please fill all of them and try again",
       });
@@ -103,11 +103,11 @@ export const updateListing = async (req: Request, res: Response) => {
       categoryId,
     } = req.body;
     if (price) price = Number(price);
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const files = req.files as Express.Multer.File[];
     const imagesUrls = files.map((file) => `uploads/${file.filename}`);
     if (!listingId) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "fail",
         message: "id of listing you want update is missing",
       });
@@ -120,7 +120,7 @@ export const updateListing = async (req: Request, res: Response) => {
       !status &&
       !categoryId
     ) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "fail",
         message:
           "you did't update any thing should provide a field at least for update",
@@ -143,9 +143,9 @@ export const updateListing = async (req: Request, res: Response) => {
 export const deleteListing = async (req: Request, res: Response) => {
   try {
     const listingId = req.params.id;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!listingId) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "fail",
         message: "id of listing you want delete is missing",
       });
@@ -166,11 +166,10 @@ export const getListingsByUserId = async (req: Request, res: Response) => {
   try{
   const userId=req.query.userId as string;
   if(!userId){
-    res.status(400).json({
+    return res.status(400).json({
       status: "fail",
       message: "userId is required",
     });
-    return;
   }
   const filters={userId};
   const listings=await getAll(filters);

@@ -72,7 +72,7 @@ export const createListing = async (
       },
       include: {
       images: true,
-    });
+    }});
     return newListing;
   } catch (err) {
     throw new Error(
@@ -80,14 +80,21 @@ export const createListing = async (
     );
   }
 };
-export const modifyListing = async (id: string, userId: string, data: any) => {
+export const modifyListing = async (id: string, userId: string, data: any,newImages: string[]) => {
   try {
     const listing = await prisma.listing.findUnique({ where: { id } });
     const userWantToUpdate = await findUserById(userId);
     if (!listing) throw new Error("there is no listing");
-    if (userId !== listing.userId || userWantToUpdate?.role === "admin")
+    if (userId !== listing.userId || userWantToUpdate?.role !== "admin")
       throw new Error("UNAUTHORIZED");
-    return await prisma.listing.update({ where: { id }, data });
+    prisma.$transaction(async (tx) => {
+      if (newImages ) {
+        await tx.image.deleteMany({ where: { listingId: id } });
+        const imageData = newImages.map((url) => ({ url, listingId: id }));
+        await tx.image.createMany({ data: imageData });
+        return await tx.listing.update({ where: { id }, data, include: { images: true } });
+      }
+    });
   } catch (err) {
     throw new Error(
       err.message || "there is something wrong in editing products",
@@ -99,7 +106,7 @@ export const removeListing = async (id: string, userId: string) => {
     const userWantToDelete = await findUserById(userId);
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) throw new Error("there is no listing");
-    if (listing.userId !== userId || userWantToDelete?.role === "admin")
+    if (listing.userId !== userId || userWantToDelete?.role !== "admin")
       throw new Error("UNAUTHORIZED");
     return await prisma.listing.delete({ where: { id } });
   } catch (err) {

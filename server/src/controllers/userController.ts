@@ -14,7 +14,7 @@ const createToken = (id: string, name: string, role: Role) => {
   const secretKey = process.env.SECRET_KEY!;
   const tokenExpire = process.env.SECRET_EXP as SignOptions["expiresIn"];
 
-  const token = jwt.sign({ id, name, role }, secretKey as string, {
+  const token = jwt.sign({ userId: id, name, role }, secretKey as string, {
     expiresIn: tokenExpire,
   });
   return token;
