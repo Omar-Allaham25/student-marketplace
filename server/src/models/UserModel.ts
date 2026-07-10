@@ -6,7 +6,12 @@ const findUserByEmail = async (email: string) => {
   return user;
 };
 export const findUserById = async (id: string) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    // include: {
+    //   listings: true,
+    // },
+  });
   if (!user) {
     return null;
   }

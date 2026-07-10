@@ -12,22 +12,21 @@ export const getAll = async (filters?: Record<string, any>) => {
           { description: { contains: filters.search, mode: "insensitive" } },
         ];
       }
-      if (filters.minPrice || filters.maxPrice) {
-        if (filters.minPrice) {
-          whereClause.price = { gte: filters.minPrice };
-        }
-        if (filters.maxPrice) {
-          whereClause.price = { lte: filters.maxPrice };
-        }
+     if (filters.minPrice || filters.maxPrice) {
+        whereClause.price = {};
+        if (filters.minPrice) whereClause.price.gte = filters.minPrice;
+        if (filters.maxPrice) whereClause.price.lte = filters.maxPrice;
       }
       if (filters.condition) whereClause.condition = filters.condition;
       if (filters.categoryId) whereClause.categoryId = filters.categoryId;
+      if(filters.userId) whereClause.userId=filters.userId;
     }
     const allListings = await prisma.listing.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
       include: {
         category: true,
+        images: true,
         user: {
           select: {
             id: true,
@@ -43,7 +42,7 @@ export const getAll = async (filters?: Record<string, any>) => {
 };
 export const getOne = async (id: string) => {
   try {
-    const listing = await prisma.listing.findMany({ where: { id } });
+    const listing = await prisma.listing.findUnique({ where: { id } });
     return listing;
   } catch (err) {
     throw new Error("there is problem in fetch listing now !");
@@ -56,6 +55,7 @@ export const createListing = async (
   description: string,
   price: number,
   condition: Condition,
+  images:string[],
 ) => {
   try {
     const newListing = await prisma.listing.create({
@@ -66,7 +66,12 @@ export const createListing = async (
         description,
         price,
         condition,
+        images:{
+          create:images.map((imageUrl) => ({ url: imageUrl })),
+        }
       },
+      include: {
+      images: true,
     });
     return newListing;
   } catch (err) {
@@ -80,7 +85,7 @@ export const modifyListing = async (id: string, userId: string, data: any) => {
     const listing = await prisma.listing.findUnique({ where: { id } });
     const userWantToUpdate = await findUserById(userId);
     if (!listing) throw new Error("there is no listing");
-    if (userId !== listing.userId || userWantToUpdate?.role === "student")
+    if (userId !== listing.userId || userWantToUpdate?.role === "admin")
       throw new Error("UNAUTHORIZED");
     return await prisma.listing.update({ where: { id }, data });
   } catch (err) {
@@ -94,7 +99,7 @@ export const removeListing = async (id: string, userId: string) => {
     const userWantToDelete = await findUserById(userId);
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing) throw new Error("there is no listing");
-    if (listing.userId !== userId || userWantToDelete?.role === "student")
+    if (listing.userId !== userId || userWantToDelete?.role === "admin")
       throw new Error("UNAUTHORIZED");
     return await prisma.listing.delete({ where: { id } });
   } catch (err) {

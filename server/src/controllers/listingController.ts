@@ -69,6 +69,8 @@ export const createNewListing = async (req: Request, res: Response) => {
         message: "all fields required, please fill all of them and try again",
       });
     }
+    const images = req.files as Express.Multer.File[];
+    const imagesUrls = images.map((file) => `uploads/${file.filename}`);
     const newListing = await createListing(
       userId as string,
       categoryId,
@@ -76,6 +78,7 @@ export const createNewListing = async (req: Request, res: Response) => {
       description,
       price,
       condition,
+      imagesUrls
     );
     res.status(201).json({
       status: "success",
@@ -101,6 +104,8 @@ export const updateListing = async (req: Request, res: Response) => {
     } = req.body;
     if (price) price = Number(price);
     const userId = req.user?.id;
+    const files = req.files as Express.Multer.File[];
+    const imagesUrls = files.map((file) => `uploads/${file.filename}`);
     if (!listingId) {
       res.status(400).json({
         status: "fail",
@@ -121,7 +126,7 @@ export const updateListing = async (req: Request, res: Response) => {
           "you did't update any thing should provide a field at least for update",
       });
     }
-    const data = { title, description, price, condition, status, categoryId };
+    const data = { title, description, price, condition, status, categoryId, images: imagesUrls };
     const updatedListing = await modifyListing(listingId, userId, data);
     res.status(200).json({
       status: "success",
@@ -157,3 +162,27 @@ export const deleteListing = async (req: Request, res: Response) => {
     });
   }
 };
+export const getListingsByUserId = async (req: Request, res: Response) => {
+  try{
+  const userId=req.query.userId as string;
+  if(!userId){
+    res.status(400).json({
+      status: "fail",
+      message: "userId is required",
+    });
+    return;
+  }
+  const filters={userId};
+  const listings=await getAll(filters);
+  res.status(200).json({
+    status: "success",
+    numberOfListings: listings.length,
+    listings,
+  });
+  }catch(err){
+    res.status(500).json({
+      status: "Error",
+      message: err.message || "there is problem from server",
+    })
+  }
+}
