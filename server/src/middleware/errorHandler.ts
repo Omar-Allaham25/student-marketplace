@@ -19,7 +19,8 @@ export const handlerError = (
         if(error.isOperational){
             res.status(error.statusCode).json({
                 status:error.status,
-                message:error.message
+                message:error.message,
+                ...(error.errors && { errors: error.errors })
             })
         }else{
             console.log("CRITICAL ERROR :", error);

@@ -3,6 +3,7 @@ import cors from "cors";
 import userRouter from "./routes/userRouter";
 import categoryRouter from "./routes/categoryRouter";
 import listingRouter from "./routes/listingRouter";
+import { handlerError } from "./middleware/errorHandler";
 
 const app = express();
 const port =process.env.PORT||5000;
@@ -16,8 +17,7 @@ app.use("/api/user",userRouter);
 app.use("/api/category",categoryRouter);
 app.use("/api/listings",listingRouter);
 
-
-
+app.use(handlerError);
 const server =app.listen(port,()=>{
     console.log(`server run successfuly on port ${port}!` )
 });
