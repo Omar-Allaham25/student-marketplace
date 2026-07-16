@@ -8,9 +8,9 @@ const findUserByEmail = async (email: string) => {
 export const findUserById = async (id: string) => {
   const user = await prisma.user.findUnique({
     where: { id },
-    // include: {
-    //   listings: true,
-    // },
+    include: {
+      listings: true,
+    },
   });
   if (!user) {
     return null;
