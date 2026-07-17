@@ -22,12 +22,6 @@ const createToken = (id: string, name: string, role: Role) => {
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        status: "fail",
-        message: "you must fill all fields",
-      });
-    }
     const newUser = await registerUser(name, email, password);
     if (!newUser)
       throw new Error("there is something wrong please try again !");
@@ -47,12 +41,6 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({
-        status: "fail",
-        message: "you must fill all fields",
-      });
-    }
     const user = await loginUser(email, password);
     if (!user.isActive) {
       throw new Error("Your account is deactivated");

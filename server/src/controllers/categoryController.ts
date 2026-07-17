@@ -21,9 +21,6 @@ export const getAll = async (req: Request, res: Response) => {
 export const CreateCategory = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: "Name is required" });
-    }
     const newCategory = await createCategory(name);
     res.status(201).json({
       message: "Category created successfully",
@@ -55,8 +52,8 @@ export const editCategory=async(req:Request,res:Response)=>{
   try{
     const {id}=req.params;
     const {name}=req.body;
-    if(!id || !name){
-      return res.status(400).json({message:"Category ID and name are required"});
+    if(!id ){
+      return res.status(400).json({message:"Category ID is required"});
       }
       const modifiedCategory=await modifyCategory(id as string,name as string);
       res.status(200).json({

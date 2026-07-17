@@ -18,7 +18,7 @@ export const getAllListings = async (req: Request, res: Response) => {
     if (categoryId) filters.categoryId = categoryId as string;
     const allProducts = await getAll(filters as Record<string, any>);
     res.status(200).json({
-      status: "succes",
+      status: "success",
       numberOfProducts: allProducts.length,
       listings: allProducts,
     });
@@ -56,12 +56,6 @@ export const createNewListing = async (req: Request, res: Response) => {
     let { categoryId, title, description, price, condition } = req.body;
     price = Number(price);
     const userId = req.user?.userId;
-    if (req.files?.length === 0 || !req.files) {
-      return res.status(400).json({
-        status: "fail",
-        message: "at least one image is required for listing",
-      });
-    }
     const images = req.files as Express.Multer.File[];
     const imagesUrls = images.map((file) => `uploads/${file.filename}`);
     if (
@@ -116,24 +110,6 @@ export const updateListing = async (req: Request, res: Response) => {
       return res.status(400).json({
         status: "fail",
         message: "id of listing you want update is missing",
-      });
-    }
-    let hasProvidedImages = true,
-      hasprovideanyFieald = true;
-    if (req.files && req.files.length === 0) hasProvidedImages = false;
-    if (
-      !title &&
-      !description &&
-      !price &&
-      !condition &&
-      !status &&
-      !categoryId
-    ) hasprovideanyFieald = false;
-    if (!hasProvidedImages && !hasprovideanyFieald) {
-      return res.status(400).json({
-        status: "fail",
-        message:
-          "Provide at least one field or image to update.",
       });
     }
     const data = { title, description, price, condition, status, categoryId };

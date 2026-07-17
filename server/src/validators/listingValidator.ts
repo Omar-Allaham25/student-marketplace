@@ -15,4 +15,6 @@ export const updateListingSchema = z.object({
     condition:z.enum(["new", "like-new", "used", "broken"], "Condition must be one of the specified values").optional(),
     categoryId:z.string().uuid("Category ID must be a valid UUID").optional(),
     imageUrls:z.array(z.string().url("Image URL must be a valid URL")).min(1,"At least one image URL is required").max(5,"At most 5 image URLs are allowed").optional(),
+}).refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided for listing creation",
 });
