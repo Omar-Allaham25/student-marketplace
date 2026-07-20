@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   getAll,
   getOne,
@@ -6,8 +6,13 @@ import {
   modifyListing,
   removeListing,
 } from "../models/listingModel";
+import { AppError } from "../utils/appError";
 
-export const getAllListings = async (req: Request, res: Response) => {
+export const getAllListings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { search, minPrice, maxPrice, condition, categoryId } = req.query;
     let filters: any = {};
@@ -23,54 +28,47 @@ export const getAllListings = async (req: Request, res: Response) => {
       listings: allProducts,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message || "Internal server error",
-    });
+    next(new AppError(`${err.message} || "Internal server error"`, 500));
   }
 };
-export const getListing = async (req: Request, res: Response) => {
+export const getListing = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const listingId = req.params.id as string;
     if (!listingId) {
-      return res.status(400).json({
-        status: "fail",
-        message: "id is required !",
-      });
+      next(new AppError("id of product is required", 400));
     }
     const listing = await getOne(listingId);
-    if (!listing) throw new Error("there is now listing ");
+    if (!listing) {
+      next(new AppError("there is no product whith this id", 404));
+    }
     res.status(200).json({
       status: "success",
       data: listing,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: err.meassage || "there is something wrong please try  later!",
-    });
+    next(
+      new AppError(
+        `${err.meassage} || "there is something wrong please try  later!"`,
+        500,
+      ),
+    );
   }
 };
-export const createNewListing = async (req: Request, res: Response) => {
+export const createNewListing = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     let { categoryId, title, description, price, condition } = req.body;
     price = Number(price);
     const userId = req.user?.userId;
     const images = req.files as Express.Multer.File[];
     const imagesUrls = images.map((file) => `uploads/${file.filename}`);
-    if (
-      !userId ||
-      !categoryId ||
-      !title ||
-      !description ||
-      !price ||
-      !condition
-    ) {
-      return res.status(400).json({
-        status: "fail",
-        message: "all fields required, please fill all of them and try again",
-      });
-    }
     const newListing = await createListing(
       userId as string,
       categoryId,
@@ -85,13 +83,14 @@ export const createNewListing = async (req: Request, res: Response) => {
       data: newListing,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "fail",
-      message: err.message || "there is something wrong in server side ",
-    });
+    next(` ${err.message} || "there is something wrong in server side "`, 500);
   }
 };
-export const updateListing = async (req: Request, res: Response) => {
+export const updateListing = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     let {
       listingId,
@@ -106,12 +105,6 @@ export const updateListing = async (req: Request, res: Response) => {
     const userId = req.user?.userId as string;
     const files = req.files as Express.Multer.File[];
     const imagesUrls = files.map((file) => `uploads/${file.filename}`);
-    if (!listingId) {
-      return res.status(400).json({
-        status: "fail",
-        message: "id of listing you want update is missing",
-      });
-    }
     const data = { title, description, price, condition, status, categoryId };
     const imagedata = imagesUrls.length > 0 ? imagesUrls : undefined;
     const updatedListing = await modifyListing(
@@ -126,13 +119,14 @@ export const updateListing = async (req: Request, res: Response) => {
       data: updatedListing,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: err.message || "there is problem from server",
-    });
+    next(new AppError(`${err.message}|| Internal Error `, 500));
   }
 };
-export const deleteListing = async (req: Request, res: Response) => {
+export const deleteListing = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const listingId = req.params.id;
     const userId = req.user?.userId as string;
@@ -148,20 +142,18 @@ export const deleteListing = async (req: Request, res: Response) => {
       message: "product deleted succesfully",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: err.message || "there is problem from server",
-    });
+    next(new AppError(`${err.message} || there is problem from server`, 500));
   }
 };
-export const getListingsByUserId = async (req: Request, res: Response) => {
+export const getListingsByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.query.userId as string;
     if (!userId) {
-      return res.status(400).json({
-        status: "fail",
-        message: "userId is required",
-      });
+      next(new AppError("userId is required", 400));
     }
     const filters = { userId };
     const listings = await getAll(filters);
@@ -171,9 +163,8 @@ export const getListingsByUserId = async (req: Request, res: Response) => {
       listings,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: err.message || "there is problem from server",
-    });
+    next(
+      new AppError(`${err.message}|| there is something wrong in server`, 500),
+    );
   }
 };

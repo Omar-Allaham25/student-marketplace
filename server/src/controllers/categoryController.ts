@@ -1,12 +1,17 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   createCategory,
   getAllCategory,
   deleteCategoryById,
   modifyCategory,
 } from "../models/categoryModel";
+import { AppError } from "../utils/appError";
 
-export const getAll = async (req: Request, res: Response) => {
+export const getAll = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const allCategories = await getAllCategory();
     return res.status(200).json({
@@ -15,10 +20,14 @@ export const getAll = async (req: Request, res: Response) => {
       categories: allCategories,
     });
   } catch (err) {
-    return res.status(500).json({ message: "Internal server error" });
+    next(new AppError("Internal server error", 500));
   }
 };
-export const CreateCategory = async (req: Request, res: Response) => {
+export const CreateCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { name } = req.body;
     const newCategory = await createCategory(name);
@@ -27,13 +36,17 @@ export const CreateCategory = async (req: Request, res: Response) => {
       category: newCategory,
     });
   } catch (err) {
-    res.status(500).json({ message: "Internal server error" });
+    next(new AppError("Internal server error", 500));
   }
 };
-export const deleteCategory = async (req: Request, res: Response) => {
+export const deleteCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     if (!req.params.id) {
-      return res.status(400).json({ message: "Category ID is required" });
+      next(new AppError("Category ID is required", 400));
     }
     const deletedCategory = await deleteCategoryById(req.params.id as string);
     res.status(200).json({
@@ -42,31 +55,27 @@ export const deleteCategory = async (req: Request, res: Response) => {
       data: deletedCategory,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    next(new AppError("Internal server error", 500));
   }
 };
-export const editCategory=async(req:Request,res:Response)=>{
-  try{
-    const {id}=req.params;
-    const {name}=req.body;
-    if(!id ){
-      return res.status(400).json({message:"Category ID is required"});
-      }
-      const modifiedCategory=await modifyCategory(id as string,name as string);
-      res.status(200).json({
-        status:"success",
-        message:"Category modified successfully",
-        data:modifiedCategory,
-      })
-
-}catch(err){
-    res.status(500).json({
-      status:"error",
-      message:err.message || "Internal server error"
+export const editCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    if (!id) {
+      next(new AppError("Category ID is required", 400));
+    }
+    const modifiedCategory = await modifyCategory(id as string, name as string);
+    res.status(200).json({
+      status: "success",
+      message: "Category modified successfully",
+      data: modifiedCategory,
     });
+  } catch (err) {
+    next(new AppError(`${err.message} || "Internal server error"`, 500));
   }
-
-  }
+};

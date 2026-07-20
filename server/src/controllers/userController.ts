@@ -1,4 +1,4 @@
-import { Response, Request } from "express";
+import { Response, Request, NextFunction } from "express";
 import {
   loginUser,
   registerUser,
@@ -9,6 +9,7 @@ import {
 import jwt, { SignOptions } from "jsonwebtoken";
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { AppError } from "../utils/appError";
 
 const createToken = (id: string, name: string, role: Role) => {
   const secretKey = process.env.SECRET_KEY!;
@@ -19,38 +20,49 @@ const createToken = (id: string, name: string, role: Role) => {
   });
   return token;
 };
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { name, email, password } = req.body;
     const newUser = await registerUser(name, email, password);
-    if (!newUser)
-      throw new Error("there is something wrong please try again !");
+    if (!newUser) next(new AppError("User registration failed", 400));
     return res.status(200).json({
       status: "success",
       message: "User registered successfully. Please verify your student email",
       User: newUser,
     });
   } catch (err) {
-    return res.status(400).json({
-      status: "fail",
-      message: err.message || "there is something wrong please try again!",
-    });
+    next(
+      new AppError(
+        `${err.message} || "there is something wrong please try again!"`,
+        500,
+      ),
+    );
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { email, password } = req.body;
     const user = await loginUser(email, password);
     if (!user.isActive) {
-      throw new Error("Your account is deactivated");
+      next(new AppError("Your account is deactivated", 401));
     }
     if (!user.isVerifide) {
-      throw new Error("Please verify your student email before logging in");
+      next(
+        new AppError("Please verify your student email before logging in", 401),
+      );
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
+      next(new AppError("Invalid email or password", 401));
     }
     const token = createToken(user.id, user.name, user.role);
     const { password: _, ...userWithoutPassword } = user;
@@ -61,40 +73,46 @@ export const login = async (req: Request, res: Response) => {
       token,
     });
   } catch (err) {
-    return res.status(401).json({
-      status: "fail",
-      message: err.message || "there is something wrong please try again!",
-    });
+    next(
+      new AppError(
+        `${err.message} || "there is something wrong please try again!"`,
+        500,
+      ),
+    );
   }
 };
-export const getMe = async (req: Request, res: Response) => {
+export const getMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      return res.status(401).json({
-        status: "fail",
-        message: "Unauthorized",
-      });
+      next(new AppError("Unauthorized", 401));
     }
     const user = await findUserById(userId as string);
     if (!user) {
-      return res.status(404).json({
-        status: "fail",
-        message: "User not found",
-      });
+      next(new AppError("User not found", 404));
     }
     return res.status(200).json({
       status: "success",
       user: user,
     });
   } catch (err) {
-    return res.status(500).json({
-      status: "fail",
-      message: err.message || "there is something wrong please try again!",
-    });
+    next(
+      new AppError(
+        ` ${err.message} || "there is something wrong please try again!"`,
+        500,
+      ),
+    );
   }
 };
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const users = await findAllUsers();
     res.status(200).json({
@@ -103,13 +121,19 @@ export const getAllUsers = async (req: Request, res: Response) => {
       users,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "fail",
-      message: err.message || "there is something wrong please try again!",
-    });
+    next(
+      new AppError(
+        `${err.message} || "there is something wrong please try again!"`,
+        500,
+      ),
+    );
   }
 };
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.params.id;
     await deleteUserById(userId as string);
@@ -118,9 +142,11 @@ export const deleteUser = async (req: Request, res: Response) => {
       message: "User deleted successfully",
     });
   } catch (err) {
-    return res.status(500).json({
-      status: "fail",
-      message: err.message || "there is something wrong please try again!",
-    });
+    next(
+      new AppError(
+        `${err.message} || "there is something wrong please try again!"`,
+        500,
+      ),
+    );
   }
 };
