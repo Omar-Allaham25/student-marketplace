@@ -2,19 +2,23 @@ import { z } from "zod";
 
 export const createListingSchema = z.object({
   title: z
-    .string()
+    .string({ error: "must provide title for product" })
     .min(5, "Title must be at least 5 characters long")
     .max(50, "Title must be at most 50 characters long"),
   description: z
-    .string()
+    .string({ error: "must provide description for product" })
     .min(10, "Description must be at least 10 characters long")
     .max(1000, "Description must be at most 1000 characters long"),
-  price: z.coerce.number().positive("Price must be a positive number"),
+  price: z.coerce
+    .number({ error: "must provide price for product" })
+    .positive("Price must be a positive number"),
   condition: z.enum(
     ["new", "like-new", "used", "broken"],
     "Condition must be one of the specified values",
   ),
-  categoryId: z.string().uuid("Category ID must be a valid UUID"),
+  categoryId: z
+    .string({ error: "must provide category ID for product" })
+    .uuid("Category ID must be a valid UUID"),
   imageUrls: z
     .array(z.string().url("Image URL must be a valid URL"))
     .min(1, "At least one image URL is required")

@@ -77,7 +77,7 @@ model Image {
 model Favorite {
   userId String
   listingId String
-  user User @relation(fields: [userId],references: [id])
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
   listing Listing @relation(fields: [listingId],references: [id],onDelete:Cascade)
   @@id([userId,listingId])
 }
@@ -86,16 +86,19 @@ id String @id @default(uuid())
 buyerId String
 sellerId String
 listingId String
+createdAt DateTime @default(now())
 
 buyer User @relation("BuyerConversations",fields: [buyerId],references: [id])
 seller User @relation("SellerConversations",fields: [sellerId],references: [id])
 listing Listing @relation(fields: [listingId],references: [id],onDelete: Cascade)
 message Message[]
+@@unique([listingId, buyerId])
 }
 model Message{ 
 id String @id @default(uuid())
 content String 
 isRead Boolean @default(false)
+isDeleted Boolean @default(false)
 createdAt DateTime @default(now())
 conversationId String
 senderID String 
