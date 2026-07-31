@@ -1,0 +1,106 @@
+import { Request, Response, NextFunction } from "express";
+import {
+  createMeassage,
+  deleteMessage as deleteMessageServices,
+  checkingConversation,
+  getUserInbox,
+  getConversationMessages as getConversationMessagesServices,
+} from "../models/messageModel";
+import { AppError } from "../utils/appError";
+
+export const sendMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { listingId, content } = req.body;
+    const senderId = req.user?.userId;
+    if (!senderId) throw new AppError("user id not provided", 400);
+    const message = await createMeassage(senderId, content, listingId);
+    res.status(201).json({
+      status: "success",
+      data: message,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.messageId as string;
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError("user id not provided", 400);
+    await deleteMessageServices(id, userId);
+    res.status(200).json({
+      status: "success",
+      message: "Message deleted",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const checkConversation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.listingId as string;
+    const buyerId = req.user?.userId;
+    if (!buyerId) throw new AppError("user id not provided", 400);
+    const conversation = await checkingConversation(buyerId, id);
+    res.status(200).json({
+      status: "success",
+      data: conversation,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getInbox = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError("user id not provided", 400);
+    const inbox = await getUserInbox(userId);
+    res.status(200).json({
+      status: "success",
+      data: inbox,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getConversationMessages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const conversationId = req.params.id as string;
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError("user id not provided", 400);
+    const messages = await getConversationMessagesServices(
+      conversationId,
+      userId,
+    );
+    res.status(200).json({
+      status: "success",
+      data: messages,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
