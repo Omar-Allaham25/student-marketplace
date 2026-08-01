@@ -89,7 +89,7 @@ export const getConversationMessages = async (
   next: NextFunction,
 ) => {
   try {
-    const conversationId = req.params.id as string;
+    const conversationId = req.params.conversationId as string;
     const userId = req.user?.userId;
     if (!userId) throw new AppError("user id not provided", 400);
     const messages = await getConversationMessagesServices(
