@@ -1,7 +1,8 @@
+import { Message } from "@prisma/client";
 import prisma from "../lib/prisma";
 import { AppError } from "../utils/appError";
 
-export const createMeassage = async (
+export const createMessage = async (
   senderId: string,
   content: string,
   listingId: string,
@@ -37,15 +38,14 @@ export const createMeassage = async (
         listingId: listingId,
       },
     });
-    const message = await prisma.message.create({
-      data: {
-        content,
-        conversationId: conversation.id,
-        senderID: senderId,
-      },
-    });
-    return message;
   }
+  return await prisma.message.create({
+    data: {
+      content,
+      conversationId: conversation.id,
+      senderID: senderId,
+    },
+  });
 };
 export const deleteMessage = async (messageId: string, userId: string) => {
   const message = await prisma.message.findUnique({
@@ -59,26 +59,25 @@ export const deleteMessage = async (messageId: string, userId: string) => {
     data: { isDeleted: true },
   });
 };
-
-export const checkingConversation = async (
+export const getConversationByListing = async (
   senderId: string,
   listingId: string,
 ) => {
   const conversation = await prisma.conversation.findUnique({
     where: { listingId_buyerId: { listingId, buyerId: senderId } },
-    include: {
-      message: { orderBy: { createdAt: "asc" } },
-    },
   });
   if (!conversation) return null;
-  const messages = await conversation.message.map((msg) => {
-    msg.isDeleted ? { ...msg, content: "This message was deleted" } : msg;
+  await markMessagesAsRead(conversation.id, senderId);
+  const messagesList = await prisma.message.findMany({
+    where: { conversationId: conversation.id },
+    orderBy: { createdAt: "asc" },
   });
+  const messages = formatMessages(messagesList);
   return { ...conversation, message: messages };
 };
 
 export const getUserInbox = async (userId: string) => {
-  const conversations = await prisma.conversation.findMany({
+  return await prisma.conversation.findMany({
     where: {
       OR: [{ buyerId: userId }, { sellerId: userId }],
     },
@@ -98,24 +97,21 @@ export const getConversationMessages = async (
 ) => {
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },
-    include: {
-      message: { orderBy: { createdAt: "asc" } },
-    },
   });
   if (!conversation) throw new AppError("Conversation not found", 404);
   if (conversation.buyerId !== userId && conversation.sellerId !== userId)
     throw new AppError("You do not have permission to view this chat", 403);
-
-  const formattedMessages = conversation.message.map((msg) => {
-    msg.isDeleted ? "This message was deleted" : msg;
+  await markMessagesAsRead(conversationId, userId);
+  const messagesList = await prisma.message.findMany({
+    where: { conversationId: conversationId },
+    orderBy: { createdAt: "asc" },
   });
+
+  const formattedMessages = formatMessages(messagesList);
   return formattedMessages;
 };
 
-export const markMessagesAsRead = async (
-  conversationId: string,
-  senderId: string,
-) => {
+const markMessagesAsRead = async (conversationId: string, senderId: string) => {
   return await prisma.message.updateMany({
     where: {
       conversationId: conversationId,
@@ -126,4 +122,9 @@ export const markMessagesAsRead = async (
       isRead: true,
     },
   });
+};
+const formatMessages = (messages: Message[]) => {
+  return messages.map((msg) =>
+    msg.isDeleted ? { ...msg, content: "This message was deleted" } : msg,
+  );
 };

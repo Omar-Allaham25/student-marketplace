@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import {
-  createMeassage,
+  createMessage,
   deleteMessage as deleteMessageServices,
-  checkingConversation,
+  getConversationByListing,
   getUserInbox,
   getConversationMessages as getConversationMessagesServices,
 } from "../models/messageModel";
@@ -17,7 +17,7 @@ export const sendMessage = async (
     const { listingId, content } = req.body;
     const senderId = req.user?.userId;
     if (!senderId) throw new AppError("user id not provided", 400);
-    const message = await createMeassage(senderId, content, listingId);
+    const message = await createMessage(senderId, content, listingId);
     res.status(201).json({
       status: "success",
       data: message,
@@ -55,7 +55,7 @@ export const checkConversation = async (
     const id = req.params.listingId as string;
     const buyerId = req.user?.userId;
     if (!buyerId) throw new AppError("user id not provided", 400);
-    const conversation = await checkingConversation(buyerId, id);
+    const conversation = await getConversationByListing(buyerId, id);
     res.status(200).json({
       status: "success",
       data: conversation,
