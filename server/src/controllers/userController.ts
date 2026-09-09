@@ -120,6 +120,24 @@ export const login = async (
     );
   }
 };
+export const getUser=async(req:Request,res:Response,next:NextFunction)=>{
+  try{
+    const userId=req.params.id;
+    if(!userId){
+      return next(new AppError("User id is required",400))
+    }
+    const user=await findUserById(userId as string);
+    if(!user){
+      return next(new AppError("User not found",404))
+    }
+    res.status(200).json({
+      status: "success",
+      user
+    })
+  }catch(err){
+return next(new AppError(err.message||"there is something wrong please try again!",500))
+  }
+}
 export const getMe = async (
   req: Request,
   res: Response,

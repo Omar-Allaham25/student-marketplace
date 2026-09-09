@@ -1,6 +1,5 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
-import { AppError } from "../utils/appError";
 
 const findUserByEmail = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
@@ -16,7 +15,12 @@ export const findUserById = async (id: string) => {
   if (!user) {
     return null;
   }
-  const { password: _, ...userWithoutPassword } = user;
+  const {
+    password: _,
+    verifyToken: _verifyToken,
+    verifyTokenExpiry: _verifyTokenExpiry,
+    ...userWithoutPassword
+  } = user;
   return userWithoutPassword;
 };
 export const registerUser = async (
