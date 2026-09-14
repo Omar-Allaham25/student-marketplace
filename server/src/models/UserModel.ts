@@ -1,7 +1,7 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
 
-const findUserByEmail = async (email: string) => {
+export const findUserByEmail = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   return user;
 };
@@ -72,6 +72,30 @@ export const loginUser = async (email: string, password: string) => {
     );
   }
 };
+export const updateUser = async (
+  userId: string,
+  updateData: Partial<{
+    name: string;
+    avatarUrl: string;
+    email: string;
+    password: string;
+    isActive: boolean;
+    resetPasswordToken: string | null;
+    resetPasswordExpiry: Date | null;
+  }>,
+) => {
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+    return updatedUser;
+  } catch (err) {
+    throw new Error(
+      err.message || "there is something wrong please try again!",
+    );
+  }
+};
 export const deleteUserById = async (id: string) => {
   try {
     if (!id) {
@@ -91,6 +115,7 @@ export const deleteUserById = async (id: string) => {
 export const findAllUsers = async () => {
   try {
     const users = await prisma.user.findMany({
+      where: { isActive: true },
       select: {
         id: true,
         name: true,
@@ -137,6 +162,21 @@ export const verifyUserByToken = async (token: string) => {
         verifyTokenExpiry: {
           gte: new Date(),
         },
+      },
+    });
+    return user;
+  } catch (err) {
+    throw new Error(
+      err.message || "there is something wrong please try again!",
+    );
+  }
+};
+export const findUserByResetToken = async (token: string) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpiry: { gte: new Date() },
       },
     });
     return user;

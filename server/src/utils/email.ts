@@ -97,3 +97,39 @@ export const sendVerificationEmail = async (
   });
   console.log("Preview URL:", nodemailer.getTestMessageUrl(info));
 };
+export const sendResetPasswordEmail = async (
+  userEmail: string,
+  resetPasswordUrl: string,
+) => {
+  const info = await transporter.sendMail({
+    from: `"Student Marketplace" <${process.env.EMAIL_FROM}>`,
+    to: userEmail,
+    subject: "Reset Your Password",
+    html: `
+      <div style="margin: 0; padding: 40px 20px; background-color: #f4f6f8; font-family: Arial, Helvetica, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+          <h1 style="margin: 0 0 20px; color: #1f2937; font-size: 28px;">Reset Your Password</h1>
+          <p style="margin: 0 0 30px; color: #6b7280; font-size: 16px; line-height: 1.6;">
+            You have requested to reset your password. Click the button below to proceed.
+          </p>
+          <a 
+            href="${resetPasswordUrl}"
+            style="
+              display: inline-block;
+              padding: 14px 28px;
+              background-color: #2563eb;
+              color: #ffffff;
+              text-decoration: none;
+              border-radius: 8px;
+              font-size: 16px;
+              font-weight: bold;
+            "
+          >
+            Reset Password
+          </a>
+        </div>
+      </div>
+    `,
+  });
+  console.log("Preview URL:", nodemailer.getTestMessageUrl(info));
+};

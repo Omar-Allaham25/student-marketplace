@@ -40,6 +40,8 @@ model User{
   updateAt DateTime @updatedAt
   verifyToken String? @unique
   verifyTokenExpiry DateTime? 
+  resetPasswordToken String? @unique
+  resetPasswordExpiry DateTime?
   listings Listing[]
   favorites Favorite[]
   messageSent  Message[]

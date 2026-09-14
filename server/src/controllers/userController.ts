@@ -33,6 +33,7 @@ export const register = async (
   try {
     const { name, email, password } = req.body;
     const { token: verifgyToken, expiryDate } = await generateVerifyToken();
+
     const newUser = await registerUser(
       name,
       email,
@@ -40,7 +41,7 @@ export const register = async (
       verifgyToken,
       expiryDate,
     );
-    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${verifgyToken}`;
+    const verificationUrl = `${process.env.BASE_URL}/verify-email/${verifgyToken}`;
     console.log("verificationUrl", verificationUrl);
     await sendVerificationEmail(email, verificationUrl);
     if (!newUser) return next(new AppError("User registration failed", 400));
@@ -80,7 +81,7 @@ export const login = async (
     if (!user.isVerified) {
       const { token: verifyToken, expiryDate } = await generateVerifyToken();
       await saveVerificationToken(user.id, verifyToken, expiryDate);
-      const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${verifyToken}`;
+      const verificationUrl = `${process.env.BASE_URL}/verify-email/${verifyToken}`;
 
       await sendVerificationEmail(email, verificationUrl);
       return next(
@@ -120,24 +121,33 @@ export const login = async (
     );
   }
 };
-export const getUser=async(req:Request,res:Response,next:NextFunction)=>{
-  try{
-    const userId=req.params.id;
-    if(!userId){
-      return next(new AppError("User id is required",400))
+export const getUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) {
+      return next(new AppError("User id is required", 400));
     }
-    const user=await findUserById(userId as string);
-    if(!user){
-      return next(new AppError("User not found",404))
+    const user = await findUserById(userId as string);
+    if (!user) {
+      return next(new AppError("User not found", 404));
     }
     res.status(200).json({
       status: "success",
-      user
-    })
-  }catch(err){
-return next(new AppError(err.message||"there is something wrong please try again!",500))
+      user,
+    });
+  } catch (err) {
+    return next(
+      new AppError(
+        err.message || "there is something wrong please try again!",
+        500,
+      ),
+    );
   }
-}
+};
 export const getMe = async (
   req: Request,
   res: Response,
