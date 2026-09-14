@@ -8,6 +8,7 @@ import {
   saveVerificationToken,
   verifyUserByToken,
   updateUserVerificationStatus,
+  deactivateUserById,updateUser as updateUserModel,
 } from "../models/UserModel";
 import { generateVerifyToken } from "../utils/createVerifyToken";
 import { sendVerificationEmail } from "../utils/email";
@@ -218,7 +219,52 @@ export const deleteUser = async (
     );
   }
 };
-
+export const deactivateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.cookies.userId;
+    await deactivateUserById(userId as string);
+    res.status(200).json({
+      status: "success",
+      message: "User deactivated successfully",
+    });
+  } catch (err) {
+    return next(
+      new AppError(
+        err.message || "there is something wrong please try again!",
+        500,
+      ),
+    );
+  }
+};
+export const updateUser= async(req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.cookies.userId;
+    const {name,avatarUrl} = req.body;
+    const updateData: Partial<{
+      name: string;
+      avatarUrl: string;
+    }> = {
+      name,
+      avatarUrl,
+    };
+    const updatedUser = await updateUserModel(userId as string, updateData);
+    res.status(200).json({
+      status: "success",
+      user: updatedUser,
+    });
+  } catch (err) {
+    return next(
+      new AppError(
+        err.message || "there is something wrong please try again!",
+        500,
+      ),
+    );
+  }
+};
 export const verifyEmail = async (
   req: Request,
   res: Response,

@@ -72,19 +72,38 @@ export const loginUser = async (email: string, password: string) => {
     );
   }
 };
+export const deactivateUserById = async (userId: string) => {
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+    });
+    const { password: _, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
+  } catch (err) {
+    throw new Error(
+      err.message || "there is something wrong please try again!",
+    );
+  }
+};
 export const updateUser = async (
   userId: string,
   updateData: Partial<{
     name: string;
     avatarUrl: string;
     email: string;
-    password: string;
-    isActive: boolean;
     resetPasswordToken: string | null;
     resetPasswordExpiry: Date | null;
   }>,
 ) => {
   try {
+    const user = await findUserById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    if (user.role !== "admin" && user.id !== userId) {
+      throw new Error("You are not authorized to update this user");
+    }
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
