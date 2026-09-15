@@ -138,3 +138,15 @@ export const removeListing = async (id: string, userId: string) => {
     );
   }
 };
+export const getListingsByUserId = async (userId: string) => {
+  try {
+    const listings = await prisma.listing.findMany({
+      where: { userId },
+    });
+    return listings;
+  } catch (err) {
+    throw new Error(
+      err.message || "there is something wrong in fetching listings by user id",
+    );
+  }
+};

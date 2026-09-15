@@ -11,7 +11,10 @@ import { protect } from "../middleware/authMiddileware";
 import { upload } from "../middleware/uploadMiddileware";
 import {
   createListingSchema,
+  getListingByIdSchema,
+  getListingsByUserIdSchema,getAllListingsSchema,
   updateListingSchema,
+  deleteListingSchema,
 } from "../validators/listingValidator";
 import { validate } from "../middleware/validation";
 
@@ -19,9 +22,9 @@ const router = Router();
 
 router.use(protect);
 
-router.get("/getListings", getAllListings);
-router.get("/getListing/:id", getListing);
-router.get("/getListingsByUserId", getListingsByUserId);
+router.get("/getListings", validate(getAllListingsSchema), getAllListings);
+router.get("/getListing/:id", validate(getListingByIdSchema), getListing);
+router.get("/getListingsByUserId/:id", validate(getListingsByUserIdSchema), getListingsByUserId);
 router.post(
   "/createListing",
   upload.array("image", 5),
@@ -34,6 +37,6 @@ router.patch(
   validate(updateListingSchema),
   updateListing,
 );
-router.delete("/deleteListing/:id", deleteListing);
+router.delete("/deleteListing/:id", validate(deleteListingSchema), deleteListing);
 
 export default router;

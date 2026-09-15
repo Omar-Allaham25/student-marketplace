@@ -1,10 +1,20 @@
 import { z } from "zod";
 
+export const checkConversationSchema = z.object({
+  params: z.object({
+    listingId: z
+      .string({ message: "Listing id is required" })
+      .uuid({ message: "Listing id must be a valid UUID" }),
+  }),
+});
+
 export const createMessageSchema = z.object({
-  content: z.string({ message: "Content is required" }).max(300),
-  listingId: z
-    .string({ message: "Listing id is required" })
-    .uuid({ message: "Listing id must be a valid UUID" }),
+  body: z.object({
+    content: z.string({ message: "Content is required" }).max(300),
+    listingId: z
+      .string({ message: "Listing id is required" })
+      .uuid({ message: "Listing id must be a valid UUID" }),
+  }),
 });
 
 export const deleteMessageSchema = z.object({

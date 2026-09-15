@@ -4,7 +4,7 @@ import {
   getOne,
   createListing,
   modifyListing,
-  removeListing,
+  removeListing,getListingsByUserId as getListingsByUserIdModel,
 } from "../models/listingModel";
 import { AppError } from "../utils/appError";
 import { uploadImageToCloundinary } from "../models/cloudinaryModel";
@@ -177,12 +177,12 @@ export const getListingsByUserId = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = req.params.userId as string;
+    const userId = req.params.id as string;
     if (!userId) {
       next(new AppError("userId is required", 400));
     }
     const filters = { userId };
-    const listings = await getAll(filters);
+    const listings = await getListingsByUserIdModel(userId);
     res.status(200).json({
       status: "success",
       numberOfListings: listings.length,

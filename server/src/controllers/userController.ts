@@ -225,7 +225,7 @@ export const deactivateUser = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = req.cookies.userId;
+    const userId = req.user?.userId;
     await deactivateUserById(userId as string);
     res.status(200).json({
       status: "success",
@@ -242,7 +242,7 @@ export const deactivateUser = async (
 };
 export const updateUser= async(req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.cookies.userId;
+    const userId = req.user?.userId;
     const {name,avatarUrl} = req.body;
     const updateData: Partial<{
       name: string;

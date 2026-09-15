@@ -92,6 +92,7 @@ export const updateUser = async (
     name: string;
     avatarUrl: string;
     email: string;
+    password: string;
     resetPasswordToken: string | null;
     resetPasswordExpiry: Date | null;
   }>,
