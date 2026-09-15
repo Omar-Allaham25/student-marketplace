@@ -45,10 +45,11 @@ export const deleteCategory = async (
   next: NextFunction,
 ) => {
   try {
-    if (!req.params.id) {
+    const { id } = req.params;
+    if (!id) {
       next(new AppError("Category ID is required", 400));
     }
-    const deletedCategory = await deleteCategoryById(req.params.id as string);
+    const deletedCategory = await deleteCategoryById(id as string);
     res.status(200).json({
       status: "success",
       message: "Category deleted successfully",

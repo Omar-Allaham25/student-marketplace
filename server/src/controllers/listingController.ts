@@ -15,9 +15,8 @@ export const getAllListings = async (
   next: NextFunction,
 ) => {
   try {
-    const { search, minPrice, maxPrice, condition, categoryId } = req.query;
+    const { search, minPrice, maxPrice, condition, categoryId ,page,limit} = req.query;
     let filters: any = {};
-    const { page, limit } = req.query;
     const pageNumber = Number(page) || 1;
     const limitNumber = Number(limit) || 10;
 
@@ -178,7 +177,7 @@ export const getListingsByUserId = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.params.userId as string;
     if (!userId) {
       next(new AppError("userId is required", 400));
     }

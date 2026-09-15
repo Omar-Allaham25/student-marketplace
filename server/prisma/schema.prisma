@@ -23,7 +23,7 @@ enum Status {
 enum Condition {
   new
   like_new
-  good
+  used
   fair
 }
 
