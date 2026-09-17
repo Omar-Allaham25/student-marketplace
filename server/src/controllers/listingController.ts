@@ -127,7 +127,7 @@ export const updateListing = async (
     const userId = req.user?.userId as string;
     const files = req.files as Express.Multer.File[];
     const imagesUrls = await Promise.all(
-      files.map((file) => uploadImageToCloundinary(file.buffer)),
+      files.map((file) => uploadImageToCloudinary(file.buffer,"student_marketplace_listings")),
     );
     const data = { title, description, price, condition, status, categoryId };
     const imagedata = imagesUrls.length > 0 ? imagesUrls : undefined;

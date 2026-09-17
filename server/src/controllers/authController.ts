@@ -18,7 +18,7 @@ export const forgotPassword = async (
     const { email } = req.body;
     const user = await findUserByEmail(email);
     if (!user) {
-      res.status(200).json({
+     return res.status(200).json({
         status: "success",
         message:
           "If an account with that email exists, a password reset link has been sent.",

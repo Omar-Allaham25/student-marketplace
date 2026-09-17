@@ -10,7 +10,7 @@ declare global {
 }
 export const protect = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies?.token;
+    const token = req.cookies?.Token;
     if (!token) {
       return res.status(401).json({
         status: "fail",
