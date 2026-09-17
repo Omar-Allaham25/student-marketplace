@@ -20,6 +20,6 @@ router.get("/", restrictTo, getAllUsers);
 router.get("/me", getMe);
 router.delete("/delete/:id", restrictTo,validate(deleteUserSchema), deleteUser);
 router.delete("/delete",deactivateUser);
-router.patch("/update",validate(updateUserSchema),updateUser);
+router.patch("/update",upload.single("avatar"),validate(updateUserSchema),updateUser);
 
 export default router;

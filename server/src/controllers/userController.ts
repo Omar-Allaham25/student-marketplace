@@ -8,7 +8,8 @@ import {
   saveVerificationToken,
   verifyUserByToken,
   updateUserVerificationStatus,
-  deactivateUserById,updateUser as updateUserModel,
+  deactivateUserById,
+  updateUser as updateUserModel,
 } from "../models/UserModel";
 import { generateVerifyToken } from "../utils/createVerifyToken";
 import { sendVerificationEmail } from "../utils/email";
@@ -16,6 +17,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { AppError } from "../utils/appError";
+import { uploadImageToCloudinary } from "../models/cloudinaryModel";
 
 const createToken = (id: string, name: string, role: Role) => {
   const secretKey = process.env.SECRET_KEY!;
@@ -240,17 +242,31 @@ export const deactivateUser = async (
     );
   }
 };
-export const updateUser= async(req: Request, res: Response, next: NextFunction) => {
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.userId;
-    const {name,avatarUrl} = req.body;
+    let { name } = req.body;
+    if (!name && !req.file) {
+      return next(new AppError("Nothing to update", 400));
+    }
     const updateData: Partial<{
       name: string;
       avatarUrl: string;
-    }> = {
-      name,
-      avatarUrl,
-    };
+    }> = {};
+    if (name) {
+      updateData.name = name;
+    }
+    if (req.file) {
+      const avatarUrl = await uploadImageToCloudinary(
+        req.file.buffer,
+        "student_marketplace_avatars",
+      );
+      updateData.avatarUrl = avatarUrl;
+    }
     const updatedUser = await updateUserModel(userId as string, updateData);
     res.status(200).json({
       status: "success",

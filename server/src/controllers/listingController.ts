@@ -7,7 +7,7 @@ import {
   removeListing,getListingsByUserId as getListingsByUserIdModel,
 } from "../models/listingModel";
 import { AppError } from "../utils/appError";
-import { uploadImageToCloundinary } from "../models/cloudinaryModel";
+import { uploadImageToCloudinary } from "../models/cloudinaryModel";
 
 export const getAllListings = async (
   req: Request,
@@ -84,7 +84,7 @@ export const createNewListing = async (
     const userId = req.user?.userId;
     const files = req.files as Express.Multer.File[];
     const imagesUrls = await Promise.all(
-      files.map((file) => uploadImageToCloundinary(file.buffer)),
+      files.map((file) => uploadImageToCloudinary(file.buffer,"student_marketplace_listings")),
     );
     const newListing = await createListing(
       userId as string,
