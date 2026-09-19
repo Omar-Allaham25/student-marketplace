@@ -46,7 +46,7 @@ export const getAll = async (
         take: limit,
       }),
     ]);
-    return {totalCount, listings};
+    return { totalCount, listings };
   } catch (err) {
     throw new Error("Error fetching listings: " + err.message);
   }

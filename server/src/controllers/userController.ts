@@ -131,12 +131,15 @@ export const getUser = async (
 ) => {
   try {
     const userId = req.params.id;
-    if (!userId) {
-      return next(new AppError("User id is required", 400));
-    }
     const user = await findUserById(userId as string);
     if (!user) {
       return next(new AppError("User not found", 404));
+    }
+    if (!user.isActive) {
+      return res.status(404).json({
+        status: "fail",
+        message: "user is unavailable",
+      });
     }
     res.status(200).json({
       status: "success",

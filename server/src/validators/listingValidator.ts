@@ -99,16 +99,16 @@ export const updateListingSchema = z
   });
 export const getListingByIdSchema = z.object({
   params: z.object({
-    listingId: z.string().uuid("Invalid listingId format"),
+    listingId: z.string("listing Id is requierd").uuid("Invalid listingId format"),
   }),
 });
 export const deleteListingSchema = z.object({
   params: z.object({
-    listingId: z.string().uuid("Invalid listingId format"),
+    listingId: z.string("listing Id is requierd").uuid("Invalid listingId format"),
   }),
 });
 export const getListingsByUserIdSchema = z.object({
   params: z.object({
-    userId: z.string().uuid("Invalid userId format"),
+    userId: z.string("user Id is requierd").uuid("Invalid userId format"),
   }),
 });

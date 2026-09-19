@@ -4,10 +4,12 @@ import {
   getOne,
   createListing,
   modifyListing,
-  removeListing,getListingsByUserId as getListingsByUserIdModel,
+  removeListing,
+  getListingsByUserId as getListingsByUserIdModel,
 } from "../models/listingModel";
 import { AppError } from "../utils/appError";
 import { uploadImageToCloudinary } from "../models/cloudinaryModel";
+import { findUserById } from "../models/UserModel";
 
 export const getAllListings = async (
   req: Request,
@@ -15,7 +17,8 @@ export const getAllListings = async (
   next: NextFunction,
 ) => {
   try {
-    const { search, minPrice, maxPrice, condition, categoryId ,page,limit} = req.query;
+    const { search, minPrice, maxPrice, condition, categoryId, page, limit } =
+      req.query;
     let filters: any = {};
     const pageNumber = Number(page) || 1;
     const limitNumber = Number(limit) || 10;
@@ -53,12 +56,9 @@ export const getListing = async (
 ) => {
   try {
     const listingId = req.params.id as string;
-    if (!listingId) {
-      next(new AppError("id of product is required", 400));
-    }
     const listing = await getOne(listingId);
     if (!listing) {
-      next(new AppError("there is no product whith this id", 404));
+      return next(new AppError("there is no product whith this id", 404));
     }
     res.status(200).json({
       status: "success",
@@ -83,8 +83,13 @@ export const createNewListing = async (
     price = Number(price);
     const userId = req.user?.userId;
     const files = req.files as Express.Multer.File[];
+    if (files.length === 0) {
+      return next(new AppError("At least one image is required", 400));
+    }
     const imagesUrls = await Promise.all(
-      files.map((file) => uploadImageToCloudinary(file.buffer,"student_marketplace_listings")),
+      files.map((file) =>
+        uploadImageToCloudinary(file.buffer, "student_marketplace_listings"),
+      ),
     );
     const newListing = await createListing(
       userId as string,
@@ -126,8 +131,13 @@ export const updateListing = async (
     if (price !== undefined) price = Number(price);
     const userId = req.user?.userId as string;
     const files = req.files as Express.Multer.File[];
+    if (files.length === 0) {
+      return next(new AppError("At least one image is required", 400));
+    }
     const imagesUrls = await Promise.all(
-      files.map((file) => uploadImageToCloudinary(file.buffer,"student_marketplace_listings")),
+      files.map((file) =>
+        uploadImageToCloudinary(file.buffer, "student_marketplace_listings"),
+      ),
     );
     const data = { title, description, price, condition, status, categoryId };
     const imagedata = imagesUrls.length > 0 ? imagesUrls : undefined;
@@ -154,12 +164,6 @@ export const deleteListing = async (
   try {
     const listingId = req.params.id;
     const userId = req.user?.userId as string;
-    if (!listingId) {
-      return res.status(400).json({
-        status: "fail",
-        message: "id of listing you want delete is missing",
-      });
-    }
     await removeListing(listingId as string, userId);
     res.status(200).json({
       status: "success",
@@ -178,10 +182,19 @@ export const getListingsByUserId = async (
 ) => {
   try {
     const userId = req.params.id as string;
-    if (!userId) {
-      next(new AppError("userId is required", 400));
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User is not found",
+      });
     }
-    const filters = { userId };
+    if (!user.isActive) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User is unavailable",
+      });
+    }
     const listings = await getListingsByUserIdModel(userId);
     res.status(200).json({
       status: "success",

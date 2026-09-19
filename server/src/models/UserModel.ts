@@ -19,6 +19,8 @@ export const findUserById = async (id: string) => {
     password: _,
     verifyToken: _verifyToken,
     verifyTokenExpiry: _verifyTokenExpiry,
+    resetPasswordToken: _resetPasswordToken,
+    resetPasswordExpiry: _resetPasswordExpiry,
     ...userWithoutPassword
   } = user;
   return userWithoutPassword;
