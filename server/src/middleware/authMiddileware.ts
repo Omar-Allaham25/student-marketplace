@@ -1,5 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { findUserById } from "../models/UserModel";
+import { AppError } from "../utils/appError";
 
 declare global {
   namespace Express {
@@ -8,7 +10,11 @@ declare global {
     }
   }
 }
-export const protect = (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = req.cookies?.Token;
     if (!token) {
@@ -27,7 +33,16 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
         message: "Unauthorized access",
       });
     }
-    req.user = decode;
+    const user = await findUserById(decode.userId);
+    if (!user) {
+      return next(new AppError("User no longer exists", 401));
+    }
+
+    if (!user.isActive) {
+      return next(new AppError("Your account is inactive", 403));
+    }
+
+    req.user = { userId: user.id, role: user.role };
     next();
   } catch (err) {
     console.error(err);

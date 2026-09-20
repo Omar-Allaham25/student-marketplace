@@ -17,11 +17,11 @@ export const getAllListings = async (
   next: NextFunction,
 ) => {
   try {
-    const { search, minPrice, maxPrice, condition, categoryId, page, limit } =
+    const { search, minPrice, maxPrice, condition, categoryId, page } =
       req.query;
     let filters: any = {};
-    const pageNumber = Number(page) || 1;
-    const limitNumber = Number(limit) || 10;
+    const pageNumber = Math.max(Number(req.query.page) || 1, 1);
+    const limitNumber = 12;
 
     if (search) filters.search = search as string;
     if (minPrice) filters.minPrice = Number(minPrice);

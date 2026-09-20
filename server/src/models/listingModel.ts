@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma";
-import { Condition } from "@prisma/client";
+import { Condition, Prisma } from "@prisma/client";
 import { findUserById } from "./UserModel";
 
 export const getAll = async (
@@ -9,7 +9,7 @@ export const getAll = async (
 ) => {
   try {
     const skip = (page - 1) * limit;
-    const whereClause: Record<string, any> = {};
+    const whereClause: Prisma.ListingWhereInput = {};
     if (filters) {
       if (filters.search) {
         whereClause.OR = [
@@ -26,7 +26,7 @@ export const getAll = async (
       if (filters.categoryId) whereClause.categoryId = filters.categoryId;
       if (filters.userId) whereClause.userId = filters.userId;
     }
-
+    whereClause.user = { isActive: true };
     const [totalCount, listings] = await prisma.$transaction([
       prisma.listing.count({ where: whereClause }),
       prisma.listing.findMany({
@@ -53,7 +53,9 @@ export const getAll = async (
 };
 export const getOne = async (id: string) => {
   try {
-    const listing = await prisma.listing.findUnique({ where: { id } });
+    const listing = await prisma.listing.findUnique({
+      where: { id, user: { isActive: true } },
+    });
     return listing;
   } catch (err) {
     throw new Error("there is problem in fetch listing now !");
