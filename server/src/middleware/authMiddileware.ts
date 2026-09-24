@@ -45,7 +45,6 @@ export const protect = async (
     req.user = { userId: user.id, role: user.role };
     next();
   } catch (err) {
-    console.error(err);
     return res.status(401).json({
       status: "fail",
       message: "Invalid token",

@@ -7,11 +7,6 @@ export const getAllListingsSchema = z.object({
       .regex(/^\d+$/, "Page must be a positive integer")
       .min(1, "Page must be at least 1")
       .max(100, "Page must be at most 100"),
-    limit: z
-      .string()
-      .regex(/^\d+$/, "Limit must be a positive integer")
-      .min(1, "Limit must be at least 1")
-      .max(50, "Limit must be at most 50"),
     search: z
       .string()
       .min(1, "search must be at least 1 character long")
@@ -99,12 +94,14 @@ export const updateListingSchema = z
   });
 export const getListingByIdSchema = z.object({
   params: z.object({
-    listingId: z.string("listing Id is requierd").uuid("Invalid listingId format"),
+    id: z.string("listing Id is requierd").uuid("Invalid listingId format"),
   }),
 });
 export const deleteListingSchema = z.object({
   params: z.object({
-    listingId: z.string("listing Id is requierd").uuid("Invalid listingId format"),
+    listingId: z
+      .string("listing Id is requierd")
+      .uuid("Invalid listingId format"),
   }),
 });
 export const getListingsByUserIdSchema = z.object({
