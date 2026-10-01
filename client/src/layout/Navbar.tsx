@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAppSelector } from "../../store/hooks";
+import { Bell } from "lucide-react";
 
 export const Navbar = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
@@ -43,6 +44,13 @@ export const Navbar = () => {
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
+              <Link
+                to="/notifications"
+                className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+              </Link>
               <Link
                 to="/create-listing"
                 className="rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
