@@ -130,10 +130,7 @@ export const updateListing = async (
     } = req.body;
     if (price !== undefined) price = Number(price);
     const userId = req.user?.userId as string;
-    const files = req.files as Express.Multer.File[];
-    if (files.length === 0) {
-      return next(new AppError("At least one image is required", 400));
-    }
+    const files = (req.files ?? []) as Express.Multer.File[];
     const imagesUrls = await Promise.all(
       files.map((file) =>
         uploadImageToCloudinary(file.buffer, "student_marketplace_listings"),

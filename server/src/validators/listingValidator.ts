@@ -22,7 +22,7 @@ export const getAllListingsSchema = z.object({
       .regex(/^\d+$/, "maxPrice must be a positive integer")
       .min(0, "maxPrice must be a positive integer")
       .optional(),
-    condition: z.enum(["new", "like-new", "used", "fair"]).optional(),
+    condition: z.enum(["new", "like_new", "used", "fair"]).optional(),
     categoryId: z.string().uuid("Category ID must be a valid UUID").optional(),
   }),
 });
@@ -40,7 +40,7 @@ export const createListingSchema = z.object({
       .number({ error: "must provide price for product" })
       .positive("Price must be a positive number"),
     condition: z.enum(
-      ["new", "like-new", "used", "fair"],
+      ["new", "like_new", "used", "fair"],
       "Condition must be one of the specified values",
     ),
     categoryId: z
@@ -74,7 +74,7 @@ export const updateListingSchema = z
         .optional(),
       condition: z
         .enum(
-          ["new", "like-new", "used", "fair"],
+          ["new", "like_new", "used", "fair"],
           "Condition must be one of the specified values",
         )
         .optional(),

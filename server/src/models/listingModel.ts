@@ -55,6 +55,7 @@ export const getOne = async (id: string) => {
   try {
     const listing = await prisma.listing.findUnique({
       where: { id, user: { isActive: true } },
+      include: { images: true },
     });
     return listing;
   } catch (err) {
