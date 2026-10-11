@@ -99,6 +99,8 @@ export const login = async (
       password: _password,
       verifyToken: _verifyToken,
       verifyTokenExpiry: _verifyTokenExpiry,
+      resetPasswordExpiry:_resetPasswordExpiry,
+      resetPasswordToken:_resetPasswordToken,
       ...userWithoutPassword
     } = user;
     return res
