@@ -8,7 +8,7 @@ const router=express.Router();
 
 router.post("/register", validate(registerSchema), register);
 router.post("/login", validate(loginSchema), login);
-router.get("/verify-email/:token",validate(verifyEmailSchema), verifyEmail);
+router.post("/verify-email/",validate(verifyEmailSchema), verifyEmail);
 router.post("/forgot-password",validate(forgotPasswordSchema), forgotPassword);
 router.post("/reset-password/:token",validate(resetPasswordSchema) ,resetPassword);
 export default router;

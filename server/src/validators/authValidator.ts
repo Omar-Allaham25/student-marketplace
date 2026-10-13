@@ -23,7 +23,7 @@ export const loginSchema = z.object({
   }),
 });
 export const verifyEmailSchema = z.object({
-  params: z.object({
+  body: z.object({
     token: z.string({ message: "token required" }),
   }),
 });

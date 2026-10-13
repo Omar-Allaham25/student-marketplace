@@ -64,8 +64,9 @@ export const authApi = {
     if (!token) {
       throw new Error("Token is required");
     }
-    const response = await api.get<AuthMessageResetResponse>(
-      `auth/verify-email/${token}`
+    const response = await api.post<AuthMessageResetResponse>(
+      "auth/verify-email/",
+      { token }
     );
     return response.data;
   },

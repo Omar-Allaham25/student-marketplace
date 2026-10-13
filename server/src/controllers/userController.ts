@@ -44,10 +44,10 @@ export const register = async (
       verifgyToken,
       expiryDate,
     );
-    const verificationUrl = `${process.env.BASE_URL}/verify-email/${verifgyToken}`;
+    if (!newUser) return next(new AppError("User registration failed", 400));
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${encodeURIComponent(verifgyToken)}`;
     console.log("verificationUrl", verificationUrl);
     await sendVerificationEmail(email, verificationUrl);
-    if (!newUser) return next(new AppError("User registration failed", 400));
     return res.status(201).json({
       status: "success",
       message: "User registered successfully. Please verify your student email",
@@ -84,7 +84,7 @@ export const login = async (
     if (!user.isVerified) {
       const { token: verifyToken, expiryDate } = await generateVerifyToken();
       await saveVerificationToken(user.id, verifyToken, expiryDate);
-      const verificationUrl = `${process.env.BASE_URL}/verify-email/${verifyToken}`;
+      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${encodeURIComponent(verifyToken)}`;
 
       await sendVerificationEmail(email, verificationUrl);
       return next(
@@ -292,7 +292,7 @@ export const verifyEmail = async (
   next: NextFunction,
 ) => {
   try {
-    const { token } = req.params;
+    const { token } = req.body;
     if (!token) {
       return next(new AppError("Verification token is required", 400));
     }
