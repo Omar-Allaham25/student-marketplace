@@ -55,7 +55,13 @@ export const getOne = async (id: string) => {
   try {
     const listing = await prisma.listing.findUnique({
       where: { id, user: { isActive: true } },
-      include: { images: true },
+      include: {
+        category: true,
+        images: true,
+        user: {
+          select: { id: true, name: true },
+        },
+      },
     });
     return listing;
   } catch (err) {
@@ -85,7 +91,11 @@ export const createListing = async (
         },
       },
       include: {
+        category: true,
         images: true,
+        user: {
+          select: { id: true, name: true },
+        },
       },
     });
     return newListing;
@@ -118,7 +128,13 @@ export const modifyListing = async (
       return await tx.listing.update({
         where: { id },
         data,
-        include: { images: true },
+        include: {
+          category: true,
+          images: true,
+          user: {
+            select: { id: true, name: true },
+          },
+        },
       });
     });
   } catch (err) {
@@ -145,6 +161,13 @@ export const getListingsByUserId = async (userId: string) => {
   try {
     const listings = await prisma.listing.findMany({
       where: { userId },
+      include: {
+        category: true,
+        images: true,
+        user: {
+          select: { id: true, name: true },
+        },
+      },
     });
     return listings;
   } catch (err) {

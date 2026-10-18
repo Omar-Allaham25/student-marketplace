@@ -1,5 +1,6 @@
 import prisma from "../lib/prisma";
 import { AppError } from "../utils/appError";
+import { listingCardInclude } from "../utils/prismaIncludes";
 
 export const toggleFavorite = async (listingId: string, userId: string) => {
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
@@ -27,8 +28,16 @@ export const toggleFavorite = async (listingId: string, userId: string) => {
 export const getUserFavorites = async (userId: string) => {
   const favorites = await prisma.favorite.findMany({
     where: { userId },
-    include: { listing: true },
-    orderBy:{createdAt:"desc"}
+    include: {
+      listing: {
+        include: {
+          category: true,
+          images: true,
+          user: { select: { id: true, name: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
   });
-  return favorites.map(fav=>fav.listing);
+  return favorites.map((fav) => fav.listing);
 };

@@ -1,31 +1,30 @@
 import api from "./api";
+import type { FavoriteListing } from "../types/listing";
 
-interface listing {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  condition: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  categoryId: string;
-}
-interface GetFavoritesResponse {
+export interface GetFavoritesResponse {
   status: string;
   results: number;
   data: {
-    favorites: listing[];
+    favorites: FavoriteListing[];
+  };
+}
+
+export interface ToggleFavoriteResponse {
+  status: string;
+  data: {
+    status: "added" | "removed";
+    message: string;
   };
 }
 export const favoriteApi = {
   getFavorites: async (): Promise<GetFavoritesResponse> => {
-    const response = await api.get("/favorites/getFavorites");
+    const response = await api.get<GetFavoritesResponse>("/favorites/getFavorites");
     return response.data;
   },
-  toggleFavorite: async (listingId: string): Promise<{ status: string; message: string }> => {
-    const response = await api.post(`/favorites/toggleFavorite/${listingId}`);
+  toggleFavorite: async (
+    listingId: string,
+  ): Promise<ToggleFavoriteResponse> => {
+    const response = await api.post<ToggleFavoriteResponse>(`/favorites/toggleFavorite/${listingId}`);
     return response.data;
-  }
+  },
 };

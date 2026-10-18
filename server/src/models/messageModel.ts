@@ -1,7 +1,6 @@
 import { Message } from "@prisma/client";
 import prisma from "../lib/prisma";
 import { AppError } from "../utils/appError";
-
 export const createMessage = async (
   senderId: string,
   content: string,
@@ -39,21 +38,21 @@ export const createMessage = async (
       },
     });
   }
-  const [newMessage,lastUpdate]=await prisma.$transaction([
-  prisma.message.create({
-    data: {
-      content,
-      conversationId: conversation.id,
-      senderID: senderId,
-    },
-    include: {
-      conversation: true,
-    },
-  }),
-  prisma.conversation.update({
-    where: { id: conversation.id },
-    data: { UpdatedAt: new Date() },
-  }),
+  const [newMessage, lastUpdate] = await prisma.$transaction([
+    prisma.message.create({
+      data: {
+        content,
+        conversationId: conversation.id,
+        senderID: senderId,
+      },
+      include: {
+        conversation: true,
+      },
+    }),
+    prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { UpdatedAt: new Date() },
+    }),
   ]);
   return newMessage;
 };
@@ -138,7 +137,7 @@ const formatMessages = (messages: Message[]) => {
     msg.isDeleted ? { ...msg, content: "This message was deleted" } : msg,
   );
 };
- export const updateMessageReadStatus = async (
+export const updateMessageReadStatus = async (
   conversationId: string,
   messagesIds: string[],
 ) => {

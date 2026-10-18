@@ -9,7 +9,13 @@ export const findUserById = async (id: string) => {
   const user = await prisma.user.findUnique({
     where: { id },
     include: {
-      listings: true,
+      listings: {
+        include: {
+          category: true,
+          images: true,
+          user: { select: { id: true, name: true } },
+        },
+      },
     },
   });
   if (!user) {
@@ -111,7 +117,15 @@ export const updateUser = async (
       where: { id: userId },
       data: updateData,
     });
-    return updatedUser;
+    const {
+      password: _,
+      verifyToken: _verifyToken,
+      verifyTokenExpiry: _verifyTokenExpiry,
+      resetPasswordToken: _resetPasswordToken,
+      resetPasswordExpiry: _resetPasswordExpiry,
+      ...userWithoutSensitiveFields
+    } = updatedUser;
+    return userWithoutSensitiveFields;
   } catch (err) {
     throw new Error(
       err.message || "there is something wrong please try again!",
