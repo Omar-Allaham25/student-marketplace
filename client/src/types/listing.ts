@@ -28,7 +28,6 @@ export interface ListingCore {
   updatedAt: string;
 }
 
-/** The shared payload returned for marketplace listing cards and details. */
 export interface ListingCard extends ListingCore {
   category: ListingCategory;
   images: ListingImage[];
@@ -44,4 +43,54 @@ export interface ConversationListingPreview {
   id: string;
   title: string;
   images: ListingImage[];
+}
+
+export interface GetListingsRequest {
+  page?: number;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  condition?: string;
+  categoryId?: string;
+}
+
+export interface GetListingsResponse {
+  status: string;
+  resultLength: number;
+  pagination: {
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    limit: number;
+  };
+  data: ListingCard[];
+}
+
+export interface GetListingByIdRequest {
+  id: string;
+}
+export interface GetListingByIdResponse {
+  status: string;
+  data: ListingDetail;
+}
+export interface GetListingsByUserIdRequest {
+  userId: string;
+}
+export interface GetListingsByUserIdResponse {
+  status: string;
+  message?: string;
+  numberOfListings?: number;
+  data: UserOwnedListing[];
+}
+export interface ListingMutationResponse {
+  status: string;
+  data: ListingCard;
+  message?: string;
+}
+export interface DeleteListingRequest {
+  id: string;
+}
+export interface DeleteListingResponse {
+  status: string;
+  message: string;
 }

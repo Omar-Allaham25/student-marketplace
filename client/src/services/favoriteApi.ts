@@ -1,21 +1,6 @@
 import api from "./api";
-import type { FavoriteListing } from "../types/listing";
+import type { GetFavoritesResponse, ToggleFavoriteResponse } from "../types/favorite";
 
-export interface GetFavoritesResponse {
-  status: string;
-  results: number;
-  data: {
-    favorites: FavoriteListing[];
-  };
-}
-
-export interface ToggleFavoriteResponse {
-  status: string;
-  data: {
-    status: "added" | "removed";
-    message: string;
-  };
-}
 export const favoriteApi = {
   getFavorites: async (): Promise<GetFavoritesResponse> => {
     const response = await api.get<GetFavoritesResponse>("/favorites/getFavorites");
