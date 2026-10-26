@@ -3,8 +3,15 @@ import { MainLayout } from './layout/MainLayout';
 import {NotFound} from './pages/NotFound';
 import {ProtectedRoute} from './components/common/ProtectedRoute';
 import './App.css'
+import { useAppDispatch } from './store/hooks';
+import { checkAuth } from './features/authSlice';
+import { useEffect } from 'react';
 
 function App() {
+  const dispatch=useAppDispatch();
+   useEffect(()=>{
+    dispatch(checkAuth());
+  },[dispatch])
   return (
       <BrowserRouter>
       <Routes>
