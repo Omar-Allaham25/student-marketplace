@@ -6,6 +6,7 @@ import './App.css'
 import { useAppDispatch } from './store/hooks';
 import { checkAuth } from './features/authSlice';
 import { useEffect } from 'react';
+import { Register } from './pages/Register';
 
 function App() {
   const dispatch=useAppDispatch();

@@ -1,8 +1,9 @@
 import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
+import { Prisma } from "@prisma/client";
 
 export const findUserByEmail = async (email: string) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
   return user;
 };
 export const findUserById = async (id: string) => {
@@ -35,20 +36,34 @@ export const registerUser = async (
   name: string,
   email: string,
   password: string,
+  universityId: string,
   verifyToken: string,
   expiryDate: Date,
 ) => {
   try {
-    const existingUser = await findUserByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await findUserByEmail(normalizedEmail);
     if (existingUser) {
       throw new Error("Email is already in use");
+    }
+    const emailDomain = normalizedEmail.split("@")[1];
+    const university = await prisma.university.findUnique({
+      where: { id: universityId },
+      include: { domains: true },
+    });
+    if (!university) {
+      throw new Error("University not found");
+    }
+    if (!university.domains.some(({ domain }) => domain === emailDomain)) {
+      throw new Error("Your email domain is not approved for this university");
     }
     const saltRounds = 10;
     const hashPassword = await bcrypt.hash(password, saltRounds);
     const newUser = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
+        universityId,
         password: hashPassword,
         verifyToken: verifyToken,
         verifyTokenExpiry: expiryDate,
@@ -62,9 +77,10 @@ export const registerUser = async (
     } = newUser;
     return userWithoutPassword;
   } catch (err) {
-    throw new Error(
-      err.message || "there is something wrong please try again!",
-    );
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      throw new Error("Email is already in use");
+    }
+    throw new Error(err instanceof Error ? err.message : "there is something wrong please try again!");
   }
 };
 export const loginUser = async (email: string, password: string) => {

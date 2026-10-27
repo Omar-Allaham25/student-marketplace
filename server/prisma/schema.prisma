@@ -11,15 +11,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 enum Role {
   student
   admin
 }
+
 enum Status {
   draft
   sold
   active
 }
+
 enum Condition {
   new
   like_new
@@ -27,86 +30,111 @@ enum Condition {
   fair
 }
 
-model User{
-  id   String  @id @default(uuid())
-  name String 
-  email String @unique 
-  password  String 
-  role  Role @default(student)
-  isVerified Boolean @default(false)
-  isActive  Boolean @default(true)
-  avatarUrl String? 
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  verifyToken String? @unique
-  verifyTokenExpiry DateTime? 
-  resetPasswordToken String? @unique
+model User {
+  id                  String         @id @default(uuid())
+  name                String
+  email               String         @unique
+  password            String
+  role                Role           @default(student)
+  isVerified          Boolean        @default(false)
+  isActive            Boolean        @default(true)
+  avatarUrl           String?
+  createdAt           DateTime       @default(now())
+  updateAt            DateTime       @updatedAt
+  verifyToken         String?        @unique
+  verifyTokenExpiry   DateTime?
+  resetPasswordToken  String?        @unique
   resetPasswordExpiry DateTime?
-  listings Listing[]
-  favorites Favorite[]
-  messageSent  Message[]
-  buyerConversations Conversation[] @relation("BuyerConversations")
+  universityId        String?
+  university          University?    @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  listings            Listing[]
+  favorites           Favorite[]
+  messageSent         Message[]
+  buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
 }
-model Category{
-  id String @id @default(uuid())
-  name String @unique
-  slug String @unique
+
+model University {
+  id      String             @id @default(uuid())
+  name    String             @unique
+  users   User[]
+  domains UniversityDomain[]
+}
+
+model UniversityDomain {
+  id           String     @id @default(uuid())
+  domain       String     @unique
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@index([universityId])
+}
+
+model Category {
+  id      String    @id @default(uuid())
+  name    String    @unique
+  slug    String    @unique
   listing Listing[]
 }
 
 model Listing {
-  id String @id @default(uuid())
-  title String
-  description String
-  price Int
-  condition Condition
-  status  Status @default(active)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId String 
-  categoryId String
-  user User @relation(fields: [userId],references: [id])
-  category Category @relation(fields: [categoryId],references: [id])
-  images Image[]
-  favorites Favorite[]
+  id            String         @id @default(uuid())
+  title         String
+  description   String
+  price         Int
+  condition     Condition
+  status        Status         @default(active)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  userId        String
+  categoryId    String
+  user          User           @relation(fields: [userId], references: [id])
+  category      Category       @relation(fields: [categoryId], references: [id])
+  images        Image[]
+  favorites     Favorite[]
   conversations Conversation[]
 }
+
 model Image {
-  id String @id @default(uuid())
-  url String 
+  id        String  @id @default(uuid())
+  url       String
   listingId String
-  listing Listing @relation(fields: [listingId],references: [id],onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
+
 model Favorite {
-  userId String
+  userId    String
   listingId String
   createdAt DateTime @default(now())
-  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
-  listing Listing @relation(fields: [listingId],references: [id],onDelete:Cascade)
-  @@id([userId,listingId])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, listingId])
 }
-model Conversation{
-id String @id @default(uuid())
-buyerId String
-sellerId String
-listingId String
-createdAt DateTime @default(now())
-UpdatedAt DateTime @updatedAt
-buyer User @relation("BuyerConversations",fields: [buyerId],references: [id])
-seller User @relation("SellerConversations",fields: [sellerId],references: [id])
-listing Listing @relation(fields: [listingId],references: [id],onDelete: Cascade)
-message Message[]
-@@unique([listingId, buyerId])
+
+model Conversation {
+  id        String    @id @default(uuid())
+  buyerId   String
+  sellerId  String
+  listingId String
+  createdAt DateTime  @default(now())
+  UpdatedAt DateTime  @updatedAt
+  buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id])
+  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id])
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  message   Message[]
+
+  @@unique([listingId, buyerId])
 }
-model Message{ 
-id String @id @default(uuid())
-content String 
-isRead Boolean @default(false)
-isDeleted Boolean @default(false)
-createdAt DateTime @default(now())
-conversationId String
-senderID String 
-conversation Conversation @relation(fields: [conversationId],references: [id],onDelete: Cascade)
-sender User @relation(fields: [senderID],references: [id]) 
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  isRead         Boolean      @default(false)
+  isDeleted      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  conversationId String
+  senderID       String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderID], references: [id])
 }

@@ -10,6 +10,7 @@ export interface User {
   avatarUrl: string | null;
   createdAt: string;
   updateAt: string;
+  universityId?: string | null;
 }
 
 export interface UserWithListings extends User {

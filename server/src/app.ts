@@ -9,6 +9,7 @@ import { handlerError } from "./middleware/errorHandler";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
+import universityRouter from "./routes/universityRouter";
 
 const app = express();
 app.use(helmet());
@@ -31,6 +32,7 @@ app.use(
 );
 app.use(express.json());
 app.use("/api/auth", authRouter);
+app.use("/api/universities", universityRouter);
 app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/listings", listingRouter);

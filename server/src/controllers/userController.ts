@@ -34,13 +34,14 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, universityId } = req.body;
     const { token: verifgyToken, expiryDate } = await generateVerifyToken();
 
     const newUser = await registerUser(
       name,
       email,
       password,
+      universityId,
       verifgyToken,
       expiryDate,
     );
@@ -51,12 +52,16 @@ export const register = async (
     return res.status(201).json({
       status: "success",
       message: "User registered successfully. Please verify your student email",
-      User: newUser,
+      user: newUser,
     });
   } catch (err) {
+    const message = err instanceof Error ? err.message : "User registration failed";
+    if (message === "Email is already in use" || message === "University not found" || message === "Your email domain is not approved for this university") {
+      return next(new AppError(message, 400));
+    }
     return next(
       new AppError(
-        err.message || "there is something wrong please try again!",
+        message,
         500,
       ),
     );
