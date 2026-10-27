@@ -1,1 +1,12 @@
 @import "tailwindcss";
+@layer base {
+  body {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    background-color: #fdfbf9;
+    color: #160824;
+  }
+
+  .font-serif-editorial {
+    font-family: "Playfair Display", Georgia, serif;
+  }
+}
