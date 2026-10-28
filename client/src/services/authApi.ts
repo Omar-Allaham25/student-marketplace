@@ -43,6 +43,10 @@ export const authApi = {
 
     return response.data;
   },
+  logout: async (): Promise<AuthMessageResetResponse> => {
+    const response = await api.post<AuthMessageResetResponse>("/auth/logout");
+    return response.data;
+  },
   register: async (data: RegisterData): Promise<RegisterResponse> => {
     if (!data.name || !data.email || !data.password || !data.universityId) {
       throw new Error("Name, email, password and university are required");

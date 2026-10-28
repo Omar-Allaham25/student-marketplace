@@ -9,6 +9,21 @@ import {
 } from "../models/UserModel";
 import { sendResetPasswordEmail } from "../utils/email";
 
+export const logout = (_req: Request, res: Response) => {
+  res
+    .clearCookie("Token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    })
+    .status(200)
+    .json({
+      status: "success",
+      message: "Logged out successfully",
+    });
+};
+
 export const forgotPassword = async (
   req: Request,
   res: Response,

@@ -1,6 +1,7 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice,type PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "../types/user";
 import { userApi } from "../services/userApi";
+import { authApi } from "../services/authApi";
 
 interface AuthState {
   user: User | null;
@@ -22,10 +23,26 @@ export const checkAuth = createAsyncThunk(
   },
 );
 
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch }) => {
+    try {
+      await authApi.logout();
+    } finally {
+      dispatch(logout());
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
+  reducers:{
+    setCredentials: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.loading = false;
+    },
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -50,5 +67,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setCredentials } = authSlice.actions;
 export default authSlice.reducer;

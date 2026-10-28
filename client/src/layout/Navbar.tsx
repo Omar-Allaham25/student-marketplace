@@ -1,9 +1,11 @@
 import { Link, NavLink } from "react-router-dom";
-import { useAppSelector } from "../../store/hooks";
-import { Bell } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { logoutUser } from "../features/authSlice";
+import { Bell, LogOut } from "lucide-react";
 
 export const Navbar = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-colors hover:text-indigo-600 ${
@@ -63,6 +65,14 @@ export const Navbar = () => {
               >
                 {user?.name ? user.name.slice(0, 2).toUpperCase() : "ME"}
               </Link>
+              <button
+                type="button"
+                onClick={() => void dispatch(logoutUser())}
+                className="text-sm font-medium text-gray-600 hover:text-indigo-600"
+              >
+                <LogOut className="h-5 w-5" />
+                Log out
+              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
